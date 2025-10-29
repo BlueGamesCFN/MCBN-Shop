@@ -1,0 +1,27 @@
+# Kompilierte Java-Dateien
+*.class
+
+# Build-Ordner
+/target/
+/build/
+/out/
+
+# Fertige JAR-Dateien
+*.jar
+*.zip
+
+# Log-Dateien
+logs/
+*.log
+
+# IDE-spezifische Dateien
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db

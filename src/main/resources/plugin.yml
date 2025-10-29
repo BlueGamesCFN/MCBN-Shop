@@ -1,0 +1,51 @@
+name: MCBN-Shops
+version: 1.1.1
+main: de.mcbn.shops.Main
+api-version: '1.21'
+author: MCB-Network
+website: https://mcbn.de
+description: 'Behälter-Shops und Auktionen mit Sidebar & Bossbar (Paper 1.21.8) + Shopkeeper & Floating Items'
+
+commands:
+  shop:
+    description: Shop-Funktionen
+    usage: /shop <create|remove|buy|info>
+    aliases: [shops]
+    permission: mcbn.shops.use
+  auction:
+    description: Auktionshaus öffnen/bedienen
+    usage: /auction <start|browse|list|cancel|claim>
+    aliases: [auktion, auctions]
+    permission: mcbn.auctions.use
+  shopkeeper:
+    description: Shopkeeper verwalten (Villager)
+    usage: /shopkeeper <create|link|unlink|remove|list|tp>
+    permission: mcbn.shopkeeper.use
+  mcbnshops:
+    description: Admin-Befehle
+    usage: /mcbnshops <reload|save>
+    permission: mcbn.admin
+
+permissions:
+  mcbn.shops.use:
+    default: true
+  mcbn.shops.create:
+    default: true
+  mcbn.shops.remove:
+    default: true
+  mcbn.shops.buy:
+    default: true
+  mcbn.auctions.use:
+    default: true
+  mcbn.auctions.start:
+    default: true
+  mcbn.auctions.browse:
+    default: true
+  mcbn.auctions.cancel:
+    default: true
+  mcbn.auctions.claim:
+    default: true
+  mcbn.shopkeeper.use:
+    default: true
+  mcbn.admin:
+    default: op

@@ -1,0 +1,26 @@
+# MCBN-Shops Konfiguration
+currency-material: DIAMOND
+buy-mode: SNEAK_RIGHT_CLICK   # SNEAK_RIGHT_CLICK oder COMMAND_ONLY
+look-range-blocks: 6
+scoreboard:
+  title: '&aMCBN &7Shop'
+  enabled: true
+bossbar:
+  broadcast-interval-minutes: 15
+  display-seconds-per-item: 5
+  color: BLUE
+  style: SEGMENTED_10
+auctions:
+  max-duration-hours: 72
+  min-duration-minutes: 10
+  allow-multiple-items: true
+storage:
+  autosave-minutes: 10
+
+floating-item:
+  enabled: true
+  height: 1.2
+  refresh-seconds: 5
+
+shopkeepers:
+  enabled: true
