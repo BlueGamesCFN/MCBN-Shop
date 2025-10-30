@@ -17,6 +17,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import java.util.Optional;
+
 public class ShopListener implements Listener {
 
     private final Main plugin;
