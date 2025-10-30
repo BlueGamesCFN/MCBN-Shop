@@ -477,4 +477,24 @@ public class AuctionManager {
         if (is.getItemMeta() != null && is.getItemMeta().hasDisplayName()) return is.getItemMeta().getDisplayName();
         return is.getType().name();
     }
+
+    /**
+     * Gibt die Map mit nicht abgeholten Items zurück.
+     * Wird vom AuctionReminderService verwendet.
+     *
+     * @return Map von UUID zu Liste von ItemStacks
+     */
+    public Map<UUID, List<ItemStack>> getPendingItems() {
+        return pendingItems;
+    }
+
+    /**
+     * Gibt die Map mit nicht abgeholter Währung zurück.
+     * Wird vom AuctionReminderService verwendet.
+     *
+     * @return Map von UUID zu Integer (Währungsmenge)
+     */
+    public Map<UUID, Integer> getPendingCurrency() {
+        return pendingCurrency;
+    }
 }
