@@ -39,9 +39,12 @@ public class ShopListener implements Listener {
         if (event.getAction() != Action.LEFT_CLICK_BLOCK) return;
         if (event.getHand() != EquipmentSlot.HAND) return;
         Block block = event.getClickedBlock();
-        if (block == null || !shops.isShop(block)) return;
+        if (block == null) return;
 
-        Shop s = shops.get(block).get();
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(block);
+        if (!shopOpt.isPresent()) return;
+        Shop s = shopOpt.get();
         Player p = event.getPlayer();
 
         // Owner darf normal abbauen
@@ -57,9 +60,12 @@ public class ShopListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getHand() != EquipmentSlot.HAND) return;
         Block block = event.getClickedBlock();
-        if (block == null || !shops.isShop(block)) return;
+        if (block == null) return;
 
-        Shop s = shops.get(block).get();
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(block);
+        if (!shopOpt.isPresent()) return;
+        Shop s = shopOpt.get();
         Player p = event.getPlayer();
 
         if (s.owner().equals(p.getUniqueId())) {
@@ -86,9 +92,12 @@ public class ShopListener implements Listener {
         if (!(event.getPlayer() instanceof Player)) return;
         Player p = (Player) event.getPlayer();
         Block block = event.getInventory().getLocation() != null ? event.getInventory().getLocation().getBlock() : null;
-        if (block == null || !shops.isShop(block)) return;
+        if (block == null) return;
 
-        Shop s = shops.get(block).get();
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(block);
+        if (!shopOpt.isPresent()) return;
+        Shop s = shopOpt.get();
         if (!s.owner().equals(p.getUniqueId()) && !p.hasPermission("mcbn.admin")) {
             event.setCancelled(true);
             p.sendMessage(plugin.messages().prefixed("chest-locked-shop"));
@@ -99,8 +108,11 @@ public class ShopListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
         Block b = event.getBlock();
-        if (!shops.isShop(b)) return;
-        Shop s = shops.get(b).get();
+
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(b);
+        if (!shopOpt.isPresent()) return;
+        Shop s = shopOpt.get();
         if (!s.owner().equals(event.getPlayer().getUniqueId()) && !event.getPlayer().hasPermission("mcbn.admin")) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(plugin.messages().prefixed("not-owner"));

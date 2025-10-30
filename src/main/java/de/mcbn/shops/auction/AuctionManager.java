@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -26,9 +27,9 @@ public class AuctionManager {
     private final Messages msg;
     private final ChatPromptService prompts;
 
-    private final Map<String, Auction> auctions = new LinkedHashMap<>();
-    private final Map<UUID, List<ItemStack>> pendingItems = new HashMap<>();
-    private final Map<UUID, Integer> pendingCurrency = new HashMap<>();
+    private final Map<String, Auction> auctions = new ConcurrentHashMap<>();
+    private final Map<UUID, List<ItemStack>> pendingItems = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> pendingCurrency = new ConcurrentHashMap<>();
 
     private File file;
     private YamlConfiguration data;
@@ -56,9 +57,10 @@ public class AuctionManager {
         return msg;
     }
 
-    /** Unmodifiable-View aller Auktionen. */
+    /** Thread-safe Kopie aller Auktionen für sichere Iteration. */
     public Collection<Auction> allAuctions() {
-        return Collections.unmodifiableCollection(auctions.values());
+        // Defensive copy für thread-safe Iteration
+        return new ArrayList<>(auctions.values());
     }
 
     /* =================== Laden/Speichern =================== */

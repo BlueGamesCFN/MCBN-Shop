@@ -113,6 +113,9 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            // Alle Event Listener deregistrieren (verhindert Memory Leak bei Reload)
+            org.bukkit.event.HandlerList.unregisterAll(this);
+
             // MCBNTabChat Integration aufräumen
             if (tabChatIntegration != null) {
                 tabChatIntegration.unregister();
@@ -122,6 +125,7 @@ public class Main extends JavaPlugin {
             bossBarService.stop();
             displayService.stop();
             tutorialBroadcastService.stop();
+            scheduler.stop(); // Autosave-Task stoppen
             auctionManager.saveAuctions();
             shopManager.saveShops();
             keeperManager.save();

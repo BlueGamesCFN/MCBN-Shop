@@ -15,10 +15,11 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ShopManager {
     private final Main plugin;
-    private final Map<BlockPosKey, Shop> shops = new HashMap<>();
+    private final Map<BlockPosKey, Shop> shops = new ConcurrentHashMap<>();
     private File file;
     private YamlConfiguration data;
 
@@ -37,7 +38,8 @@ public class ShopManager {
     }
 
     public Collection<Shop> all() {
-        return Collections.unmodifiableCollection(shops.values());
+        // Defensive copy für thread-safe Iteration
+        return new ArrayList<>(shops.values());
     }
 
     public void createShop(UUID owner, Block block, ItemStack template, int bundleAmount, int price) {

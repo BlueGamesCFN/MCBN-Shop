@@ -109,10 +109,12 @@ public class ShopCommands implements CommandExecutor, TabCompleter {
                     String.valueOf(plugin.getConfig().getInt("look-range-blocks", 6))));
             return true;
         }
-        if (!shops.isShop(target)) {
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(target);
+        if (!shopOpt.isPresent()) {
             p.sendMessage(msg.prefixed("shop-not-found")); return true;
         }
-        Shop s = shops.get(target).get();
+        Shop s = shopOpt.get();
         if (!s.owner().equals(p.getUniqueId()) && !p.hasPermission("mcbn.admin")) {
             p.sendMessage(msg.prefixed("not-owner")); return true;
         }
@@ -128,10 +130,15 @@ public class ShopCommands implements CommandExecutor, TabCompleter {
 
     private boolean handleInfo(Player p) {
         Block target = p.getTargetBlockExact(plugin.getConfig().getInt("look-range-blocks", 6));
-        if (target == null || !shops.isShop(target)) {
+        if (target == null) {
             p.sendMessage(msg.prefixed("shop-not-found")); return true;
         }
-        Shop s = shops.get(target).get();
+        // Atomic check-and-get zur Vermeidung von Race Conditions
+        Optional<Shop> shopOpt = shops.get(target);
+        if (!shopOpt.isPresent()) {
+            p.sendMessage(msg.prefixed("shop-not-found")); return true;
+        }
+        Shop s = shopOpt.get();
         p.sendMessage("§7Item: §f" + prettyItem(s.template()) +
                 " §7Bundle: §f" + s.bundleAmount() +
                 " §7Preis: §b" + s.price() + "x " + s.currency().name());

@@ -13,12 +13,13 @@ import org.bukkit.entity.Villager;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Verwaltung der Shopkeeper (Villager) inkl. Persistenz. */
 public class KeeperManager {
 
     private final Main plugin;
-    private final Map<UUID, ShopKeeper> keepers = new HashMap<>();
+    private final Map<UUID, ShopKeeper> keepers = new ConcurrentHashMap<>();
     private File file;
     private YamlConfiguration data;
 
@@ -28,7 +29,10 @@ public class KeeperManager {
         this.data = new YamlConfiguration();
     }
 
-    public Collection<ShopKeeper> all() { return Collections.unmodifiableCollection(keepers.values()); }
+    public Collection<ShopKeeper> all() {
+        // Defensive copy für thread-safe Iteration
+        return new ArrayList<>(keepers.values());
+    }
     public ShopKeeper get(UUID uuid) { return keepers.get(uuid); }
 
     public void load() {
