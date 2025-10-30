@@ -6,14 +6,28 @@ scoreboard:
   title: '&aMCBN &7Shop'
   enabled: true
 bossbar:
+  # Display mode: PERMANENT (always visible) or PERIODIC (shows every X minutes)
+  mode: PERIODIC  # PERMANENT | PERIODIC
+
+  # For PERIODIC mode: how often to broadcast auction info
   broadcast-interval-minutes: 15
+
+  # For PERIODIC mode: how long each auction item is shown
   display-seconds-per-item: 5
+
+  # For PERMANENT mode: how often to update the time remaining
+  update-interval-seconds: 30
+
+  # Visual appearance
   color: BLUE
   style: SEGMENTED_10
 auctions:
   max-duration-hours: 72
   min-duration-minutes: 10
   allow-multiple-items: true
+
+  # Reminder system for unclaimed items/currency
+  reminder-interval-minutes: 15  # How often to remind players to claim
 storage:
   autosave-minutes: 10
 

@@ -139,13 +139,44 @@ public class AuctionGUI implements Listener {
 
         int slot = 0;
         for (Auction a : auctions) {
+            // Calculate time remaining
+            long remaining = a.endMillis() - System.currentTimeMillis();
+            String timeStr = formatTimeRemaining(remaining);
+            boolean isActive = a.isActive();
+
             for (AuctionLot lot : a.lots()) {
                 ItemStack it = lot.item().clone();
                 ItemMeta meta = it.getItemMeta();
                 List<String> lore = new ArrayList<>();
+
+                // Amount info (if stack)
+                if (it.getAmount() > 1) {
+                    lore.add(ChatColor.GOLD + "Menge: " + ChatColor.WHITE + it.getAmount() + "x");
+                }
+
                 lore.add(ChatColor.GRAY + "Start: " + ChatColor.AQUA + lot.startBid());
                 lore.add(ChatColor.GRAY + "Aktuell: " + ChatColor.AQUA + lot.currentPrice());
                 lore.add(ChatColor.GRAY + "Währung: " + ChatColor.WHITE + a.currency().name());
+
+                // Time remaining
+                if (isActive) {
+                    lore.add(ChatColor.GREEN + "Endet in: " + ChatColor.WHITE + timeStr);
+                } else {
+                    lore.add(ChatColor.RED + "Beendet!");
+                }
+
+                // Bidder status
+                if (lot.highestBidder() != null) {
+                    if (lot.highestBidder().equals(p.getUniqueId())) {
+                        lore.add(ChatColor.GOLD + "★ Du bist Höchstbieter! ★");
+                    } else {
+                        lore.add(ChatColor.GRAY + "Höchstbieter: " + ChatColor.YELLOW + "Anderer Spieler");
+                    }
+                } else {
+                    lore.add(ChatColor.RED + "Keine Gebote");
+                }
+
+                lore.add("");
                 lore.add(ChatColor.DARK_GRAY + "Auktions-ID: " + a.id() + " | Los: " + lot.id());
                 meta.setLore(lore);
                 it.setItemMeta(meta);
@@ -214,5 +245,28 @@ public class AuctionGUI implements Listener {
 
     private static class BrowseHolder implements InventoryHolder {
         @Override public Inventory getInventory() { return null; }
+    }
+
+    /**
+     * Formatiert Millisekunden zu lesbarer Zeit.
+     */
+    private static String formatTimeRemaining(long ms) {
+        if (ms <= 0) return "Abgelaufen";
+
+        long hours = ms / (1000 * 60 * 60);
+        long minutes = (ms / (1000 * 60)) % 60;
+        long seconds = (ms / 1000) % 60;
+
+        if (hours > 0) {
+            return hours + "h " + minutes + "m";
+        } else if (minutes > 0) {
+            if (minutes > 5) {
+                return minutes + "m";
+            } else {
+                return minutes + "m " + seconds + "s";
+            }
+        } else {
+            return seconds + "s";
+        }
     }
 }

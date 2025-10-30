@@ -14,6 +14,7 @@ import de.mcbn.shops.shop.ShopListener;
 import de.mcbn.shops.shop.ShopManager;
 import de.mcbn.shops.shop.gui.ShopBuyGUI;
 import de.mcbn.shops.shop.gui.ShopCreateGUI;
+import de.mcbn.shops.util.AuctionReminderService;
 import de.mcbn.shops.util.BossBarService;
 import de.mcbn.shops.util.DisplayService;
 import de.mcbn.shops.util.Messages;
@@ -32,6 +33,7 @@ public class Main extends JavaPlugin {
     private ScoreboardService scoreboardService;
     private AuctionManager auctionManager;
     private BossBarService bossBarService;
+    private AuctionReminderService auctionReminderService;
     private DisplayService displayService;
     private KeeperManager keeperManager;
     private OrderManager orderManager;
@@ -55,6 +57,7 @@ public class Main extends JavaPlugin {
         this.scoreboardService = new ScoreboardService(this, shopManager);
         this.auctionManager = new AuctionManager(this, prompts);
         this.bossBarService = new BossBarService(this, auctionManager);
+        this.auctionReminderService = new AuctionReminderService(this, auctionManager);
         this.displayService = new DisplayService(this, shopManager);
         this.keeperManager = new KeeperManager(this);
         this.orderManager = new OrderManager(this);
@@ -100,6 +103,7 @@ public class Main extends JavaPlugin {
         // --- Hintergrunddienste starten ---
         scoreboardService.start();
         bossBarService.start();
+        auctionReminderService.start();
         displayService.start();
         tutorialBroadcastService.start();
         scheduler.startAutosave();
@@ -124,6 +128,7 @@ public class Main extends JavaPlugin {
 
             scoreboardService.stop();
             bossBarService.stop();
+            auctionReminderService.stop();
             displayService.stop();
             tutorialBroadcastService.stop();
             scheduler.stop(); // Autosave-Task stoppen
@@ -164,6 +169,7 @@ public class Main extends JavaPlugin {
         orderManager.load();
 
         bossBarService.reloadFromConfig();
+        auctionReminderService.reload();
         displayService.reload();
         tutorialBroadcastService.reload();
 

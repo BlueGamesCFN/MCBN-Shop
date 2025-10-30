@@ -13,8 +13,8 @@ public class AuctionLot {
 
     public AuctionLot(String id, ItemStack item, int startBid) {
         this.id = id;
-        this.item = item.clone();
-        this.item.setAmount(1);
+        this.item = item.clone(); // Keep original stack amount
+        // Removed setAmount(1) - now supports stacks
         this.startBid = startBid;
         this.highestBid = 0;
         this.highestBidder = null;
