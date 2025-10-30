@@ -7,6 +7,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -20,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ScoreboardService {
+public class ScoreboardService implements Listener {
 
     private final Main plugin;
     private final ShopManager shops;
@@ -53,6 +57,13 @@ public class ScoreboardService {
         });
         ourBoards.clear();
         prevBoards.clear();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        ourBoards.remove(uuid);
+        prevBoards.remove(uuid);
     }
 
     private void update(Player p) {

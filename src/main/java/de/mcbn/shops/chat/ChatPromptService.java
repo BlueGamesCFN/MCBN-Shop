@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 
@@ -37,6 +38,11 @@ public class ChatPromptService implements Listener {
 
     public boolean has(Player p) { return active.containsKey(p.getUniqueId()); }
     public void clear(Player p) { active.remove(p.getUniqueId()); }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        clear(event.getPlayer());
+    }
 
     private void handle(Player player, String message) {
         BiConsumer<Player, String> h = active.remove(player.getUniqueId());

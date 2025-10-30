@@ -106,9 +106,17 @@ public class ShopBuyGUI implements Listener {
     }
 
     private static String prettyItem(ItemStack is) {
-        if (is.getItemMeta() != null && is.getItemMeta().hasDisplayName()) return is.getItemMeta().getDisplayName();
-        String n = is.getType().name().toLowerCase(Locale.ROOT).replace('_',' ');
-        return Character.toUpperCase(n.charAt(0)) + n.substring(1);
+        if (is == null || is.getType() == Material.AIR) return "Unknown";
+
+        ItemMeta meta = is.getItemMeta();
+        if (meta != null && meta.hasDisplayName()) {
+            return meta.getDisplayName();
+        }
+
+        String n = is.getType().name().toLowerCase(Locale.ROOT).replace('_', ' ');
+        if (n.isEmpty()) return "Unknown";
+
+        return Character.toUpperCase(n.charAt(0)) + (n.length() > 1 ? n.substring(1) : "");
     }
 
     @EventHandler

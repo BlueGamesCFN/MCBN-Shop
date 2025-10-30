@@ -135,11 +135,19 @@ public class ShopCreateGUI implements Listener {
 
         switch (clicked.getType()) {
             case REDSTONE: {
-                String name = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-                if (name.contains("Bundle")) s.bundle = Math.max(1, s.bundle - 1);
-                if (name.contains("Preis")) s.price = Math.max(1, s.price - 1);
-                e.getInventory().setItem(11, bundleItem(s.bundle));
-                e.getInventory().setItem(20, priceItem(s.price, currency));
+                if (clicked != null && clicked.getType() != Material.AIR) {
+                    ItemMeta meta = clicked.getItemMeta();
+                    if (meta == null || !meta.hasDisplayName()) return;
+
+                    String name = ChatColor.stripColor(meta.getDisplayName());
+                    if (name.contains("Bundle")) {
+                        s.bundle = Math.max(1, s.bundle - 1);
+                        e.getInventory().setItem(11, bundleItem(s.bundle));
+                    } else if (name.contains("Preis")) {
+                        s.price = Math.max(1, s.price - 1);
+                        e.getInventory().setItem(20, priceItem(s.price, currency));
+                    }
+                }
                 break;
             }
             case EMERALD: {

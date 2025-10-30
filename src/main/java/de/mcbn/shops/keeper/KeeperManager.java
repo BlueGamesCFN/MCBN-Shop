@@ -43,17 +43,39 @@ public class KeeperManager {
 
             if (data.isConfigurationSection("keepers")) {
                 for (String id : data.getConfigurationSection("keepers").getKeys(false)) {
-                    String base = "keepers." + id + ".";
-                    UUID uuid = UUID.fromString(id);
-                    UUID owner = UUID.fromString(data.getString(base + "owner"));
-                    String world = data.getString(base + "world");
-                    int x = data.getInt(base + "x");
-                    int y = data.getInt(base + "y");
-                    int z = data.getInt(base + "z");
-                    ShopKeeper k = new ShopKeeper(uuid, owner, world, x, y, z);
-                    List<String> linked = data.getStringList(base + "linked");
-                    for (String s : linked) k.add(BlockPosKey.fromString(s));
-                    keepers.put(uuid, k);
+                    try {
+                        String base = "keepers." + id + ".";
+
+                        UUID uuid;
+                        try {
+                            uuid = UUID.fromString(id);
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().warning("Ungültige UUID für Keeper '" + id + "': " + e.getMessage());
+                            plugin.getLogger().warning("Keeper wird übersprungen.");
+                            continue;
+                        }
+
+                        UUID owner;
+                        try {
+                            owner = UUID.fromString(data.getString(base + "owner"));
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().warning("Ungültige Owner-UUID in Keeper '" + id + "': " + e.getMessage());
+                            plugin.getLogger().warning("Keeper wird übersprungen.");
+                            continue;
+                        }
+
+                        String world = data.getString(base + "world");
+                        int x = data.getInt(base + "x");
+                        int y = data.getInt(base + "y");
+                        int z = data.getInt(base + "z");
+                        ShopKeeper k = new ShopKeeper(uuid, owner, world, x, y, z);
+                        List<String> linked = data.getStringList(base + "linked");
+                        for (String s : linked) k.add(BlockPosKey.fromString(s));
+                        keepers.put(uuid, k);
+                    } catch (Exception e) {
+                        plugin.getLogger().severe("Fehler beim Laden von Keeper '" + id + "': " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (Exception e) {

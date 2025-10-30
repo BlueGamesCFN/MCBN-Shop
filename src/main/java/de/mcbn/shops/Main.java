@@ -71,6 +71,7 @@ public class Main extends JavaPlugin {
         // --- NEU: GUI-basierte Shop-Funktionen ---
         Bukkit.getPluginManager().registerEvents(new ShopCreateGUI(this, shopManager), this);
         Bukkit.getPluginManager().registerEvents(new ShopBuyGUI(this, shopManager), this);
+        Bukkit.getPluginManager().registerEvents(scoreboardService, this);
 
         // --- Commands ---
         Objects.requireNonNull(getCommand("shop"))

@@ -79,45 +79,76 @@ public class AuctionManager {
 
             if (data.isConfigurationSection("auctions")) {
                 for (String id : data.getConfigurationSection("auctions").getKeys(false)) {
-                    String base = "auctions." + id + ".";
-                    UUID owner = UUID.fromString(data.getString(base + "owner"));
-                    long start = data.getLong(base + "start");
-                    long duration = data.getLong(base + "duration");
-                    Material currency = Material.matchMaterial(data.getString(base + "currency", "DIAMOND"));
-                    Auction a = new Auction(id, owner, start, duration, currency == null ? Material.DIAMOND : currency);
+                    try {
+                        String base = "auctions." + id + ".";
 
-                    if (data.isConfigurationSection(base + "lots")) {
-                        for (String lid : data.getConfigurationSection(base + "lots").getKeys(false)) {
-                            String lb = base + "lots." + lid + ".";
-                            ItemStack item = data.getItemStack(lb + "item");
-                            int startBid = data.getInt(lb + "startBid");
-                            AuctionLot lot = new AuctionLot(lid, item, startBid);
-
-                            int hb = data.getInt(lb + "highestBid");
-                            String hbId = data.getString(lb + "highestBidder", null);
-                            if (hbId != null) lot.applyBid(UUID.fromString(hbId), hb);
-
-                            a.lots().add(lot);
+                        UUID owner;
+                        try {
+                            owner = UUID.fromString(data.getString(base + "owner"));
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().warning("Ungültige UUID in Auktion '" + id + "': " + e.getMessage());
+                            plugin.getLogger().warning("Auktion wird übersprungen.");
+                            continue;
                         }
+
+                        long start = data.getLong(base + "start");
+                        long duration = data.getLong(base + "duration");
+                        Material currency = Material.matchMaterial(data.getString(base + "currency", "DIAMOND"));
+                        Auction a = new Auction(id, owner, start, duration, currency == null ? Material.DIAMOND : currency);
+
+                        if (data.isConfigurationSection(base + "lots")) {
+                            for (String lid : data.getConfigurationSection(base + "lots").getKeys(false)) {
+                                String lb = base + "lots." + lid + ".";
+                                ItemStack item = data.getItemStack(lb + "item");
+                                int startBid = data.getInt(lb + "startBid");
+                                AuctionLot lot = new AuctionLot(lid, item, startBid);
+
+                                int hb = data.getInt(lb + "highestBid");
+                                String hbId = data.getString(lb + "highestBidder", null);
+                                if (hbId != null) {
+                                    try {
+                                        lot.applyBid(UUID.fromString(hbId), hb);
+                                    } catch (IllegalArgumentException e) {
+                                        plugin.getLogger().warning("Ungültige Bieter-UUID in Auktion '" + id + "', Lot '" + lid + "': " + e.getMessage());
+                                        plugin.getLogger().warning("Gebot wird übersprungen.");
+                                    }
+                                }
+
+                                a.lots().add(lot);
+                            }
+                        }
+                        auctions.put(a.id(), a);
+                    } catch (Exception e) {
+                        plugin.getLogger().severe("Fehler beim Laden von Auktion '" + id + "': " + e.getMessage());
+                        e.printStackTrace();
                     }
-                    auctions.put(a.id(), a);
                 }
             }
 
             if (data.isConfigurationSection("pendingItems")) {
                 for (String uuid : data.getConfigurationSection("pendingItems").getKeys(false)) {
-                    List<ItemStack> items = new ArrayList<>();
-                    for (Object o : data.getList("pendingItems." + uuid)) {
-                        if (o instanceof ItemStack) items.add((ItemStack) o);
+                    try {
+                        List<ItemStack> items = new ArrayList<>();
+                        for (Object o : data.getList("pendingItems." + uuid)) {
+                            if (o instanceof ItemStack) items.add((ItemStack) o);
+                        }
+                        pendingItems.put(UUID.fromString(uuid), items);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Ungültige UUID in pendingItems '" + uuid + "': " + e.getMessage());
+                        plugin.getLogger().warning("Eintrag wird übersprungen.");
                     }
-                    pendingItems.put(UUID.fromString(uuid), items);
                 }
             }
 
             if (data.isConfigurationSection("pendingCurrency")) {
                 for (String uuid : data.getConfigurationSection("pendingCurrency").getKeys(false)) {
-                    int val = data.getInt("pendingCurrency." + uuid);
-                    pendingCurrency.put(UUID.fromString(uuid), val);
+                    try {
+                        int val = data.getInt("pendingCurrency." + uuid);
+                        pendingCurrency.put(UUID.fromString(uuid), val);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Ungültige UUID in pendingCurrency '" + uuid + "': " + e.getMessage());
+                        plugin.getLogger().warning("Eintrag wird übersprungen.");
+                    }
                 }
             }
 
