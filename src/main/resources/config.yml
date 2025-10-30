@@ -24,3 +24,44 @@ floating-item:
 
 shopkeepers:
   enabled: true
+
+# Tutorial/Info-Broadcast-System
+# ========================================
+# API für externe Plugins:
+# Das Plugin feuert ein "TutorialBroadcastEvent" bevor Tutorial-Nachrichten gesendet werden.
+# Externe Plugins können dieses Event nutzen um:
+#   1) Das Event zu canceln (event.setCancelled(true)) um ein eigenes Tutorial-System zu verwenden
+#   2) Die Nachrichten zu modifizieren (event.setMessages(...)) bevor sie gesendet werden
+#   3) Eigene Logik vor oder nach dem Broadcast auszuführen
+#
+# Wenn das Event gecancelt wird, sendet dieses Plugin KEINE Nachrichten.
+# Das externe Plugin übernimmt dann die Verantwortung für die Tutorial-Anzeige.
+#
+# Beispiel Event-Handler für externe Plugins:
+#   @EventHandler
+#   public void onTutorial(TutorialBroadcastEvent event) {
+#       event.setCancelled(true);  // Übernimmt Tutorial-System
+#       // Eigene Logik hier
+#   }
+tutorial:
+  # Aktiviert/Deaktiviert das Tutorial-Broadcast-System
+  enabled: true
+
+  # Intervall in Minuten zwischen den Broadcasts
+  # Standard: 30 Minuten
+  broadcast-interval-minutes: 30
+
+  # Liste der Nachrichten, die gebroadcastet werden sollen
+  # Unterstützt Minecraft Color-Codes mit '&' (z.B. &a = grün, &c = rot)
+  # Hinweis: Externe Plugins können diese Nachrichten über das Event modifizieren
+  messages:
+    - '&8&m------------------------------------'
+    - '&6&lMCBN-Shop Tutorial:'
+    - '&7'
+    - '&e» &7Erstelle Shops mit &a/shop create'
+    - '&e» &7Nutze Auktionen mit &a/auction'
+    - '&e» &7Erstelle Shopkeeper mit &a/shopkeeper create'
+    - '&7'
+    - '&e» &7Währung: &6Diamanten'
+    - '&7'
+    - '&8&m------------------------------------'

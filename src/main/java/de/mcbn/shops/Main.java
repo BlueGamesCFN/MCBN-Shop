@@ -17,6 +17,7 @@ import de.mcbn.shops.util.BossBarService;
 import de.mcbn.shops.util.DisplayService;
 import de.mcbn.shops.util.Messages;
 import de.mcbn.shops.util.Scheduler;
+import de.mcbn.shops.util.TutorialBroadcastService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,6 +35,7 @@ public class Main extends JavaPlugin {
     private KeeperManager keeperManager;
     private OrderManager orderManager;
     private Scheduler scheduler;
+    private TutorialBroadcastService tutorialBroadcastService;
 
     public static Main get() {
         return instance;
@@ -55,6 +57,7 @@ public class Main extends JavaPlugin {
         this.keeperManager = new KeeperManager(this);
         this.orderManager = new OrderManager(this);
         this.scheduler = new Scheduler(this);
+        this.tutorialBroadcastService = new TutorialBroadcastService(this);
 
         // --- Listener-Registrierungen ---
         Bukkit.getPluginManager().registerEvents(prompts, this);
@@ -95,6 +98,7 @@ public class Main extends JavaPlugin {
         scoreboardService.start();
         bossBarService.start();
         displayService.start();
+        tutorialBroadcastService.start();
         scheduler.startAutosave();
 
         getLogger().info("MCBN-Shops erfolgreich gestartet!");
@@ -106,6 +110,7 @@ public class Main extends JavaPlugin {
             scoreboardService.stop();
             bossBarService.stop();
             displayService.stop();
+            tutorialBroadcastService.stop();
             auctionManager.saveAuctions();
             shopManager.saveShops();
             keeperManager.save();
@@ -124,6 +129,7 @@ public class Main extends JavaPlugin {
     public DisplayService displayService() { return displayService; }
     public KeeperManager keepers() { return keeperManager; }
     public OrderManager orders() { return orderManager; }
+    public TutorialBroadcastService tutorialBroadcasts() { return tutorialBroadcastService; }
 
     // --- Reload-Funktion ---
     public void reloadEverything() {
@@ -142,5 +148,6 @@ public class Main extends JavaPlugin {
 
         bossBarService.reloadFromConfig();
         displayService.reload();
+        tutorialBroadcastService.reload();
     }
 }
