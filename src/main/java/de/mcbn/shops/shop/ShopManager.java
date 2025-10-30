@@ -15,10 +15,11 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ShopManager {
     private final Main plugin;
-    private final Map<BlockPosKey, Shop> shops = new HashMap<>();
+    private final Map<BlockPosKey, Shop> shops = new ConcurrentHashMap<>();
     private File file;
     private YamlConfiguration data;
 
@@ -37,7 +38,8 @@ public class ShopManager {
     }
 
     public Collection<Shop> all() {
-        return Collections.unmodifiableCollection(shops.values());
+        // Defensive copy für thread-safe Iteration
+        return new ArrayList<>(shops.values());
     }
 
     public void createShop(UUID owner, Block block, ItemStack template, int bundleAmount, int price) {
@@ -70,23 +72,37 @@ public class ShopManager {
             if (!data.isConfigurationSection("shops")) return;
 
             for (String key : data.getConfigurationSection("shops").getKeys(false)) {
-                String base = "shops." + key + ".";
-                UUID owner = UUID.fromString(data.getString(base + "owner"));
-                ItemStack template = data.getItemStack(base + "template");
-                int bundle = data.getInt(base + "bundle");
-                int price = data.getInt(base + "price");
-                String world = data.getString(base + "world");
-                int x = data.getInt(base + "x");
-                int y = data.getInt(base + "y");
-                int z = data.getInt(base + "z");
-                Material currency = Material.matchMaterial(data.getString(base + "currency", "DIAMOND"));
-                BlockFace face = BlockFace.valueOf(data.getString(base + "signFace", "NORTH"));
-                Location loc = new Location(Bukkit.getWorld(world), x, y, z);
+                try {
+                    String base = "shops." + key + ".";
 
-                Shop s = new Shop(owner, loc, template, bundle, price,
-                        currency == null ? Material.DIAMOND : currency, face);
-                shops.put(new BlockPosKey(loc), s);
-                createSign(s);
+                    UUID owner;
+                    try {
+                        owner = UUID.fromString(data.getString(base + "owner"));
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Ungültige UUID in Shop '" + key + "': " + e.getMessage());
+                        plugin.getLogger().warning("Shop wird übersprungen.");
+                        continue;
+                    }
+
+                    ItemStack template = data.getItemStack(base + "template");
+                    int bundle = data.getInt(base + "bundle");
+                    int price = data.getInt(base + "price");
+                    String world = data.getString(base + "world");
+                    int x = data.getInt(base + "x");
+                    int y = data.getInt(base + "y");
+                    int z = data.getInt(base + "z");
+                    Material currency = Material.matchMaterial(data.getString(base + "currency", "DIAMOND"));
+                    BlockFace face = BlockFace.valueOf(data.getString(base + "signFace", "NORTH"));
+                    Location loc = new Location(Bukkit.getWorld(world), x, y, z);
+
+                    Shop s = new Shop(owner, loc, template, bundle, price,
+                            currency == null ? Material.DIAMOND : currency, face);
+                    shops.put(new BlockPosKey(loc), s);
+                    createSign(s);
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Fehler beim Laden von Shop '" + key + "': " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         } catch (Exception e) {
             plugin.getLogger().severe("Fehler beim Laden von shops.yml: " + e.getMessage());

@@ -9,12 +9,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /** Verwaltung von Einkaufslisten und Buch-Parsing. */
 public class OrderManager {
 
     private final Main plugin;
-    private final Map<UUID, PurchaseOrder> orders = new HashMap<>();
+    private final Map<UUID, PurchaseOrder> orders = new ConcurrentHashMap<>();
     private File file;
     private YamlConfiguration data;
 

@@ -71,6 +71,7 @@ public class Main extends JavaPlugin {
         // --- NEU: GUI-basierte Shop-Funktionen ---
         Bukkit.getPluginManager().registerEvents(new ShopCreateGUI(this, shopManager), this);
         Bukkit.getPluginManager().registerEvents(new ShopBuyGUI(this, shopManager), this);
+        Bukkit.getPluginManager().registerEvents(scoreboardService, this);
 
         // --- Commands ---
         Objects.requireNonNull(getCommand("shop"))
@@ -113,6 +114,9 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            // Alle Event Listener deregistrieren (verhindert Memory Leak bei Reload)
+            org.bukkit.event.HandlerList.unregisterAll(this);
+
             // MCBNTabChat Integration aufräumen
             if (tabChatIntegration != null) {
                 tabChatIntegration.unregister();
@@ -122,6 +126,7 @@ public class Main extends JavaPlugin {
             bossBarService.stop();
             displayService.stop();
             tutorialBroadcastService.stop();
+            scheduler.stop(); // Autosave-Task stoppen
             auctionManager.saveAuctions();
             shopManager.saveShops();
             keeperManager.save();
