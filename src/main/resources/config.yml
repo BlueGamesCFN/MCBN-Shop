@@ -48,20 +48,43 @@ tutorial:
   enabled: true
 
   # Intervall in Minuten zwischen den Broadcasts
-  # Standard: 30 Minuten
-  broadcast-interval-minutes: 30
+  # Standard: 40 Minuten (kann von MCBNTabChat überschrieben werden)
+  broadcast-interval-minutes: 40
 
   # Liste der Nachrichten, die gebroadcastet werden sollen
   # Unterstützt Minecraft Color-Codes mit '&' (z.B. &a = grün, &c = rot)
+  # Diese Nachrichten werden auch an MCBNTabChat weitergegeben, falls vorhanden
   # Hinweis: Externe Plugins können diese Nachrichten über das Event modifizieren
   messages:
-    - '&8&m------------------------------------'
-    - '&6&lMCBN-Shop Tutorial:'
-    - '&7'
-    - '&e» &7Erstelle Shops mit &a/shop create'
-    - '&e» &7Nutze Auktionen mit &a/auction'
-    - '&e» &7Erstelle Shopkeeper mit &a/shopkeeper create'
-    - '&7'
-    - '&e» &7Währung: &6Diamanten'
-    - '&7'
-    - '&8&m------------------------------------'
+    - '&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    - '&e&l     MCBN-Shops Tutorial'
+    - '&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    - ''
+    - '&7&lWas kannst du hier machen?'
+    - '&fMit MCBN-Shops kannst du eigene Shops erstellen,'
+    - '&fGegenstände versteigern und Shopkeeper platzieren!'
+    - ''
+    - '&7&lWichtige Commands:'
+    - '&8▸ &a/shop create &7- Erstelle einen neuen Shop'
+    - '&8▸ &a/shop info &7- Zeigt Shop-Informationen'
+    - '&8▸ &a/auction start &7- Starte eine Auktion'
+    - '&8▸ &a/auction browse &7- Durchsuche Auktionen'
+    - '&8▸ &a/shopkeeper create &7- Erstelle einen Shopkeeper (Villager)'
+    - ''
+    - '&7&lWie funktioniert ein Shop?'
+    - '&8▸ &ePlatziere eine Truhe mit deinen Waren'
+    - '&8▸ &eNutze &a/shop create &eund wähle die Truhe'
+    - '&8▸ &eSetze Preis und Menge'
+    - '&8▸ &eSpieler können mit &aShift + Rechtsklick &ekaufen'
+    - ''
+    - '&7&lWährung:'
+    - '&8▸ &6Diamanten &7sind die Währung auf diesem Server'
+    - ''
+    - '&7&lTipps:'
+    - '&8▸ &eAuktionen laufen bis zu 72 Stunden'
+    - '&8▸ &eShopkeeper können mehrere Shops verwalten'
+    - '&8▸ &eVergiss nicht deine Shops aufzufüllen!'
+    - ''
+    - '&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    - '&7Viel Erfolg beim Handeln! &e/tutorial &7für mehr Infos'
+    - '&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'

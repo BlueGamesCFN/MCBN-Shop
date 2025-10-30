@@ -5,6 +5,8 @@ api-version: '1.21'
 author: MCB-Network
 website: https://mcbn.de
 description: 'Behälter-Shops und Auktionen mit Sidebar & Bossbar (Paper 1.21.8) + Shopkeeper & Floating Items'
+softdepend:
+  - MCBNTabChat
 
 commands:
   shop:

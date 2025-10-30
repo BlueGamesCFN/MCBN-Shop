@@ -3,6 +3,7 @@ package de.mcbn.shops;
 import de.mcbn.shops.auction.AuctionGUI;
 import de.mcbn.shops.auction.AuctionManager;
 import de.mcbn.shops.chat.ChatPromptService;
+import de.mcbn.shops.integration.MCBNTabChatIntegration;
 import de.mcbn.shops.keeper.KeeperCommands;
 import de.mcbn.shops.keeper.KeeperListener;
 import de.mcbn.shops.keeper.KeeperManager;
@@ -36,6 +37,7 @@ public class Main extends JavaPlugin {
     private OrderManager orderManager;
     private Scheduler scheduler;
     private TutorialBroadcastService tutorialBroadcastService;
+    private MCBNTabChatIntegration tabChatIntegration;
 
     public static Main get() {
         return instance;
@@ -101,12 +103,21 @@ public class Main extends JavaPlugin {
         tutorialBroadcastService.start();
         scheduler.startAutosave();
 
+        // --- MCBNTabChat Integration (optional) ---
+        tabChatIntegration = new MCBNTabChatIntegration(this);
+        tabChatIntegration.integrate();
+
         getLogger().info("MCBN-Shops erfolgreich gestartet!");
     }
 
     @Override
     public void onDisable() {
         try {
+            // MCBNTabChat Integration aufräumen
+            if (tabChatIntegration != null) {
+                tabChatIntegration.unregister();
+            }
+
             scoreboardService.stop();
             bossBarService.stop();
             displayService.stop();
@@ -130,6 +141,7 @@ public class Main extends JavaPlugin {
     public KeeperManager keepers() { return keeperManager; }
     public OrderManager orders() { return orderManager; }
     public TutorialBroadcastService tutorialBroadcasts() { return tutorialBroadcastService; }
+    public MCBNTabChatIntegration tabChatIntegration() { return tabChatIntegration; }
 
     // --- Reload-Funktion ---
     public void reloadEverything() {
@@ -149,5 +161,11 @@ public class Main extends JavaPlugin {
         bossBarService.reloadFromConfig();
         displayService.reload();
         tutorialBroadcastService.reload();
+
+        // MCBNTabChat Integration neu laden
+        if (tabChatIntegration != null) {
+            tabChatIntegration.unregister();
+            tabChatIntegration.integrate();
+        }
     }
 }
