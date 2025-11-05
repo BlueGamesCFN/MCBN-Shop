@@ -35,28 +35,84 @@ public class KeeperBrowseGUI implements Listener {
 
     public static void open(Player p, List<Shop> list) {
         int size = Math.min(54, Math.max(9, ((list.size() + 8) / 9) * 9));
-        Inventory inv = Bukkit.createInventory(new BrowseHolder(), size, ChatColor.DARK_GREEN + "Shopkeeper");
+        Inventory inv = Bukkit.createInventory(new BrowseHolder(), size, "§8§l⚑ §a§lShop-Übersicht §8§l⚑");
         int slot = 0;
+
         for (Shop s : list) {
             ItemStack it = s.template().clone();
             ItemMeta meta = it.getItemMeta();
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Bundle: " + ChatColor.WHITE + s.bundleAmount());
-            lore.add(ChatColor.GRAY + "Preis: " + ChatColor.AQUA + s.price() + "x " + s.currency().name());
+
+            // Bestand berechnen
             Optional<org.bukkit.inventory.Inventory> invOpt = ShopManager.getContainerInventory(s.pos().toLocation().getBlock());
             int stockBundles = 0;
             if (invOpt.isPresent()) {
                 int stockItems = InventoryUtils.countSimilar(invOpt.get(), s.template());
                 stockBundles = stockItems / s.bundleAmount();
             }
-            lore.add(ChatColor.GRAY + "Bestand: " + ChatColor.WHITE + stockBundles + " Bundles");
-            lore.add(ChatColor.DARK_GRAY + "Shop: " + s.pos().toString());
+
+            // Item-Name mit Farbe
+            String itemName = meta.hasDisplayName() ? meta.getDisplayName() :
+                             ChatColor.AQUA + formatItemName(s.template().getType().name());
+            meta.setDisplayName(itemName);
+
+            // Lore mit visueller Trennung
+            List<String> lore = new ArrayList<>();
+            lore.add("");
+            lore.add(ChatColor.GRAY + "▸ Bundle-Größe: " + ChatColor.WHITE + s.bundleAmount() + " Stück");
+            lore.add(ChatColor.GRAY + "▸ Preis: " + ChatColor.GOLD + s.price() + "x " + ChatColor.YELLOW + formatItemName(s.currency().name()));
+            lore.add("");
+
+            // Bestand mit Farb-Indikator
+            String stockColor = getStockColor(stockBundles);
+            String stockIcon = getStockIcon(stockBundles);
+            lore.add(ChatColor.GRAY + "▸ Vorrat: " + stockColor + stockIcon + " " + stockBundles + " Bundle" + (stockBundles != 1 ? "s" : ""));
+            lore.add("");
+            lore.add(ChatColor.DARK_GRAY + "» Klicke zum Kaufen «");
+            lore.add(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + s.pos().toString());
+
             meta.setLore(lore);
+
+            // Glühen für gut gefüllte Shops
+            if (stockBundles >= 10) {
+                meta.addEnchant(org.bukkit.enchantments.Enchantment.LURE, 1, true);
+                meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ENCHANTS);
+            }
+
             it.setItemMeta(meta);
             inv.setItem(slot++, it);
             if (slot >= size) break;
         }
+
         p.openInventory(inv);
+    }
+
+    private static String formatItemName(String name) {
+        String[] parts = name.toLowerCase().replace('_', ' ').split(" ");
+        StringBuilder result = new StringBuilder();
+        for (String part : parts) {
+            if (part.length() > 0) {
+                result.append(Character.toUpperCase(part.charAt(0)))
+                      .append(part.substring(1))
+                      .append(" ");
+            }
+        }
+        return result.toString().trim();
+    }
+
+    private static String getStockColor(int bundles) {
+        if (bundles == 0) return ChatColor.RED + "" + ChatColor.BOLD;
+        if (bundles < 3) return ChatColor.RED + "";
+        if (bundles < 10) return ChatColor.YELLOW + "";
+        if (bundles < 20) return ChatColor.GREEN + "";
+        return ChatColor.DARK_GREEN + "" + ChatColor.BOLD;
+    }
+
+    private static String getStockIcon(int bundles) {
+        if (bundles == 0) return "✗";
+        if (bundles < 3) return "▁";
+        if (bundles < 10) return "▄";
+        if (bundles < 20) return "▆";
+        return "█";
     }
 
     @EventHandler
