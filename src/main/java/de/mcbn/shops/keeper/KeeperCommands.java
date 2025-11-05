@@ -94,13 +94,50 @@ public class KeeperCommands implements CommandExecutor, TabCompleter {
     }
 
     private boolean list(Player p) {
-        int count = 0;
-        for (ShopKeeper k : keeperManager.all()) if (k.owner().equals(p.getUniqueId())) {
-            count++;
-            p.sendMessage("§7Keeper §f" + k.uuid() + " §7Links: §f" + k.linked().size());
+        List<ShopKeeper> myKeepers = new ArrayList<>();
+        for (ShopKeeper k : keeperManager.all()) {
+            if (k.owner().equals(p.getUniqueId())) myKeepers.add(k);
         }
-        if (count == 0) p.sendMessage("§7Keine Keeper vorhanden.");
+
+        if (myKeepers.isEmpty()) {
+            p.sendMessage("§8§m                                    ");
+            p.sendMessage("§7Keine Shopkeeper vorhanden.");
+            p.sendMessage("§7Erstelle einen mit §e/shopkeeper create");
+            p.sendMessage("§8§m                                    ");
+            return true;
+        }
+
+        p.sendMessage("§8§m          §r §a§lMeine Shopkeeper §8§m          ");
+        p.sendMessage("");
+
+        for (int i = 0; i < myKeepers.size(); i++) {
+            ShopKeeper k = myKeepers.get(i);
+            String worldName = k.world().replace("world", "Overworld")
+                                        .replace("_nether", "Nether")
+                                        .replace("_the_end", "End");
+            int linkedCount = k.linked().size();
+
+            // Icon basierend auf Anzahl der Shops
+            String icon = linkedCount == 0 ? "§c✗" : linkedCount < 3 ? "§e⚑" : "§a⚑";
+
+            p.sendMessage("§7" + (i + 1) + ". " + icon + " §fShopkeeper");
+            p.sendMessage("   §8├ §7Position: §f" + worldName + " §8(" + k.x() + ", " + k.y() + ", " + k.z() + ")");
+            p.sendMessage("   §8└ §7Verknüpfte Shops: " + getShopCountColor(linkedCount) + linkedCount);
+            if (i < myKeepers.size() - 1) p.sendMessage("");
+        }
+
+        p.sendMessage("");
+        p.sendMessage("§8§m                                    ");
+        p.sendMessage("§7Teleport: §e/shopkeeper tp");
+        p.sendMessage("§8§m                                    ");
         return true;
+    }
+
+    private String getShopCountColor(int count) {
+        if (count == 0) return "§c";
+        if (count < 3) return "§e";
+        if (count < 5) return "§a";
+        return "§2§l";
     }
 
     private boolean tp(Player p) {
