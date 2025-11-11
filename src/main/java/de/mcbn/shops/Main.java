@@ -1,5 +1,6 @@
 package de.mcbn.shops;
 
+import de.mcbn.shops.api.ShopAPI;
 import de.mcbn.shops.auction.AuctionGUI;
 import de.mcbn.shops.auction.AuctionManager;
 import de.mcbn.shops.chat.ChatPromptService;
@@ -27,6 +28,7 @@ import java.util.Objects;
 
 public class Main extends JavaPlugin {
     private static Main instance;
+    private ShopAPI shopAPI;
     private Messages messages;
     private ChatPromptService prompts;
     private ShopManager shopManager;
@@ -54,6 +56,7 @@ public class Main extends JavaPlugin {
         this.messages = new Messages(this);
         this.prompts = new ChatPromptService(this);
         this.shopManager = new ShopManager(this);
+        this.shopAPI = new ShopAPI(this);
         this.scoreboardService = new ScoreboardService(this, shopManager);
         this.auctionManager = new AuctionManager(this, prompts);
         this.bossBarService = new BossBarService(this, auctionManager);
@@ -143,6 +146,7 @@ public class Main extends JavaPlugin {
     }
 
     // --- Getter ---
+    public ShopAPI getShopAPI() { return shopAPI; }
     public Messages messages() { return messages; }
     public ChatPromptService prompts() { return prompts; }
     public ShopManager shops() { return shopManager; }

@@ -1,8 +1,10 @@
 package de.mcbn.shops.shop;
 
 import de.mcbn.shops.Main;
+import de.mcbn.shops.api.event.ShopPurchaseEvent;
 import de.mcbn.shops.shop.gui.ShopCreateGUI;
 import de.mcbn.shops.util.Messages;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -118,7 +120,8 @@ public class ShopCommands implements CommandExecutor, TabCompleter {
         if (!s.owner().equals(p.getUniqueId()) && !p.hasPermission("mcbn.admin")) {
             p.sendMessage(msg.prefixed("not-owner")); return true;
         }
-        shops.removeShop(target);
+        // Use API to fire removal event
+        plugin.getShopAPI().removeShop(p, target);
         p.sendMessage(msg.prefixed("shop-removed"));
         return true;
     }
@@ -147,6 +150,15 @@ public class ShopCommands implements CommandExecutor, TabCompleter {
 
     /** ————————————————— Kauf-Logik (wird von Listenern & GUIs aufgerufen) ————————————————— */
     public void performPurchase(Player buyer, Block block, Shop s, int bundles) {
+        // Fire purchase event
+        ShopPurchaseEvent purchaseEvent = new ShopPurchaseEvent(buyer, s, bundles);
+        Bukkit.getPluginManager().callEvent(purchaseEvent);
+
+        if (purchaseEvent.isCancelled()) {
+            buyer.sendMessage(msg.prefixed("purchase-cancelled"));
+            return;
+        }
+
         Optional<Inventory> invOpt = ShopManager.getContainerInventory(block);
         if (!invOpt.isPresent()) {
             buyer.sendMessage(msg.prefixed("not-a-container"));

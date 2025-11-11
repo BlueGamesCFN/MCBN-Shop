@@ -120,7 +120,8 @@ public class ShopListener implements Listener {
             event.getPlayer().sendMessage(plugin.messages().prefixed("not-owner"));
             return;
         }
-        shops.removeShop(b);
+        // Use API to fire removal event
+        plugin.getShopAPI().removeShop(event.getPlayer(), b);
         event.getPlayer().sendMessage(plugin.messages().prefixed("chest-broken"));
     }
 
