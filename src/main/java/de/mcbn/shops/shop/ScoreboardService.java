@@ -29,8 +29,7 @@ public class ScoreboardService implements Listener {
     private final Main plugin;
     private final ShopManager shops;
     private int taskId = -1;
-    private final Map<UUID, Scoreboard> prevBoards = new HashMap<>();
-    private final Map<UUID, Scoreboard> ourBoards = new HashMap<>();
+    private final Map<UUID, Boolean> activeScoreboards = new HashMap<>();
 
     public ScoreboardService(Main plugin, ShopManager shops) {
         this.plugin = plugin;
@@ -49,32 +48,38 @@ public class ScoreboardService implements Listener {
 
     public void stop() {
         if (taskId != -1) Bukkit.getScheduler().cancelTask(taskId);
-        ourBoards.forEach((uuid, board) -> {
+        // Clean up our objective from all players' scoreboards
+        activeScoreboards.forEach((uuid, active) -> {
             Player p = Bukkit.getPlayer(uuid);
-            if (p != null && prevBoards.containsKey(uuid)) {
-                p.setScoreboard(prevBoards.get(uuid));
+            if (p != null) {
+                Scoreboard board = p.getScoreboard();
+                Objective obj = board.getObjective("mcbnshop");
+                if (obj != null) {
+                    obj.unregister();
+                }
             }
         });
-        ourBoards.clear();
-        prevBoards.clear();
+        activeScoreboards.clear();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        ourBoards.remove(uuid);
-        prevBoards.remove(uuid);
+        activeScoreboards.remove(uuid);
     }
 
     private void update(Player p) {
         int range = plugin.getConfig().getInt("look-range-blocks", 6);
         Block target = p.getTargetBlockExact(range);
         if (target == null || !shops.isShop(target)) {
-            // remove if present
-            if (ourBoards.containsKey(p.getUniqueId())) {
-                Scoreboard prev = prevBoards.remove(p.getUniqueId());
-                if (prev != null) p.setScoreboard(prev);
-                ourBoards.remove(p.getUniqueId());
+            // remove our objective if present
+            if (activeScoreboards.containsKey(p.getUniqueId())) {
+                Scoreboard board = p.getScoreboard();
+                Objective obj = board.getObjective("mcbnshop");
+                if (obj != null) {
+                    obj.unregister();
+                }
+                activeScoreboards.remove(p.getUniqueId());
             }
             return;
         }
@@ -89,14 +94,21 @@ public class ScoreboardService implements Listener {
         int bundles = stockItems / shop.bundleAmount();
         String title = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("scoreboard.title", "&aMCBN &7Shop"));
 
-        Scoreboard board = ourBoards.computeIfAbsent(p.getUniqueId(), u -> Bukkit.getScoreboardManager().getNewScoreboard());
+        // Use the player's existing scoreboard instead of creating a new one
+        Scoreboard board = p.getScoreboard();
         Objective obj = board.getObjective("mcbnshop");
-        if (obj == null) obj = board.registerNewObjective("mcbnshop", "dummy", title);
+        if (obj == null) {
+            obj = board.registerNewObjective("mcbnshop", "dummy", title);
+        }
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         obj.setDisplayName(title);
 
-        // Clear previous entries by creating new board objective lines
-        board.getEntries().forEach(board::resetScores);
+        // Clear previous entries from our objective only
+        for (String entry : board.getEntries()) {
+            if (obj.getScore(entry).isScoreSet()) {
+                board.resetScores(entry);
+            }
+        }
 
         int score = 7;
         String itemName = (shop.template().getItemMeta() != null && shop.template().getItemMeta().hasDisplayName())
@@ -113,10 +125,8 @@ public class ScoreboardService implements Listener {
         }
         addLine(board, obj, ChatColor.DARK_GRAY + "Kiste ansehen zum Anzeigen", score--);
 
-        if (!prevBoards.containsKey(p.getUniqueId())) {
-            prevBoards.put(p.getUniqueId(), p.getScoreboard());
-        }
-        p.setScoreboard(board);
+        // Mark that this player has our scoreboard objective active
+        activeScoreboards.put(p.getUniqueId(), true);
     }
 
     private void addLine(Scoreboard board, Objective obj, String text, int score) {
