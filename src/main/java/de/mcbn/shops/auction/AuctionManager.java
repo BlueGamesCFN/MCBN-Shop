@@ -30,6 +30,9 @@ public class AuctionManager {
     private final Map<String, Auction> auctions = new ConcurrentHashMap<>();
     private final Map<UUID, List<ItemStack>> pendingItems = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> pendingCurrency = new ConcurrentHashMap<>();
+    // BUGFIX: Task-Tracking für End-Tasks
+    // Ermöglicht Canceln bei Reload/Shutdown
+    private final Map<String, Integer> endTasks = new ConcurrentHashMap<>();
 
     private File file;
     private YamlConfiguration data;
@@ -66,6 +69,12 @@ public class AuctionManager {
     /* =================== Laden/Speichern =================== */
 
     public void loadAuctions() {
+        // BUGFIX: Cancle alle alten End-Tasks bei Reload
+        for (Integer taskId : endTasks.values()) {
+            Bukkit.getScheduler().cancelTask(taskId);
+        }
+        endTasks.clear();
+
         auctions.clear();
         pendingItems.clear();
         pendingCurrency.clear();
@@ -374,8 +383,19 @@ public class AuctionManager {
     }
 
     private void scheduleEndTask(Auction a) {
+        // BUGFIX: Cancle alten Task falls vorhanden
+        Integer oldTask = endTasks.get(a.id());
+        if (oldTask != null) {
+            Bukkit.getScheduler().cancelTask(oldTask);
+        }
+
         long delayTicks = Math.max(1L, (a.endMillis() - System.currentTimeMillis()) / 50L);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> endAuction(a.id()), delayTicks);
+        int taskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            endAuction(a.id());
+            endTasks.remove(a.id()); // Aufräumen
+        }, delayTicks).getTaskId();
+
+        endTasks.put(a.id(), taskId);
     }
 
     private void endAuction(String id) {

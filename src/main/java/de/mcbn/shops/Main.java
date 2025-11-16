@@ -69,14 +69,19 @@ public class Main extends JavaPlugin {
 
         // --- Listener-Registrierungen ---
         Bukkit.getPluginManager().registerEvents(prompts, this);
-        Bukkit.getPluginManager().registerEvents(new ShopListener(this, shopManager, prompts), this);
+
+        // BUGFIX: Erstelle ShopBuyGUI zuerst, damit es an ShopListener übergeben werden kann
+        // Verhindert doppelte Listener-Registrierung
+        ShopBuyGUI shopBuyGUI = new ShopBuyGUI(this, shopManager);
+        Bukkit.getPluginManager().registerEvents(shopBuyGUI, this);
+
+        Bukkit.getPluginManager().registerEvents(new ShopListener(this, shopManager, prompts, shopBuyGUI), this);
         Bukkit.getPluginManager().registerEvents(new AuctionGUI(this, auctionManager, prompts), this);
         Bukkit.getPluginManager().registerEvents(new KeeperListener(this, keeperManager, shopManager, prompts), this);
         Bukkit.getPluginManager().registerEvents(new de.mcbn.shops.keeper.gui.KeeperMenuGUI(this, keeperManager, shopManager), this);
 
         // --- NEU: GUI-basierte Shop-Funktionen ---
         Bukkit.getPluginManager().registerEvents(new ShopCreateGUI(this, shopManager), this);
-        Bukkit.getPluginManager().registerEvents(new ShopBuyGUI(this, shopManager), this);
         Bukkit.getPluginManager().registerEvents(scoreboardService, this);
 
         // --- Commands ---

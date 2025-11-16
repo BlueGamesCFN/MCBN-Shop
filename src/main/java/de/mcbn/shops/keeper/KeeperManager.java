@@ -20,6 +20,9 @@ public class KeeperManager {
 
     private final Main plugin;
     private final Map<UUID, ShopKeeper> keepers = new ConcurrentHashMap<>();
+    // PERFORMANCE FIX: Cache für Entity-Lookups
+    // Verhindert wiederholtes Durchsuchen aller Welten
+    private final Map<UUID, Entity> entityCache = new ConcurrentHashMap<>();
     private File file;
     private YamlConfiguration data;
 
@@ -124,6 +127,7 @@ public class KeeperManager {
         if (k == null) return false;
         Entity e = findEntity(uuid);
         if (e != null) e.remove();
+        entityCache.remove(uuid); // PERFORMANCE FIX: Cache aufräumen
         save();
         return true;
     }
@@ -143,10 +147,23 @@ public class KeeperManager {
     }
 
     public Entity findEntity(UUID id) {
+        // Prüfe Cache zuerst
+        Entity cached = entityCache.get(id);
+        if (cached != null && cached.isValid() && !cached.isDead()) {
+            return cached;
+        }
+
+        // Cache miss oder ungültig - suche in Welten
         for (World w : Bukkit.getWorlds()) {
             Entity e = w.getEntity(id);
-            if (e != null) return e;
+            if (e != null) {
+                entityCache.put(id, e); // Cache für nächsten Aufruf
+                return e;
+            }
         }
+
+        // Nicht gefunden - entferne aus Cache
+        entityCache.remove(id);
         return null;
     }
 }

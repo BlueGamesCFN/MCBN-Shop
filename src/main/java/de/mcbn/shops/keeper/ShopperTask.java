@@ -74,7 +74,12 @@ public class ShopperTask {
         final double step = Math.max(0.2, plugin.getConfig().getDouble("shopkeepers.walk-speed", 0.20));
         final int fallback = Math.max(1, plugin.getConfig().getInt("shopkeepers.step-teleport-fallback", 4));
 
-        if (taskId != -1) Bukkit.getScheduler().cancelTask(taskId);
+        // MEMORY LEAK FIX: Cancle alten Task bevor neuer erstellt wird
+        // Verhindert dass alte Tasks weiterlaufen
+        if (taskId != -1) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            taskId = -1;
+        }
         taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             int ticks = 0;
             @Override public void run() {

@@ -38,7 +38,9 @@ public class ScoreboardService implements Listener {
 
     public void start() {
         if (!plugin.getConfig().getBoolean("scoreboard.enabled", true)) return;
-        long period = 10L; // 10 ticks ~ 0.5s
+        // PERFORMANCE FIX: Erhöhe Intervall von 10 auf 20 ticks (1s statt 0.5s)
+        // Reduziert CPU-Last bei vielen Spielern erheblich
+        long period = 20L; // 20 ticks = 1s
         taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 update(p);
@@ -103,10 +105,11 @@ public class ScoreboardService implements Listener {
         obj.setDisplaySlot(DisplaySlot.SIDEBAR);
         obj.setDisplayName(title);
 
-        // Clear previous entries from our objective only
-        for (String entry : board.getEntries()) {
+        // PERFORMANCE FIX: Effizientere Löschung - nur unsere Entries löschen
+        // Vermeidet Iteration über alle Board-Entries
+        for (String entry : obj.getScoreboard().getEntries()) {
             if (obj.getScore(entry).isScoreSet()) {
-                board.resetScores(entry);
+                obj.getScore(entry).resetScore();
             }
         }
 
