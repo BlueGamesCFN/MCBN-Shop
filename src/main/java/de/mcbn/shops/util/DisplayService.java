@@ -26,7 +26,9 @@ public class DisplayService {
     }
 
     public void start() {
-        int refresh = Math.max(1, plugin.getConfig().getInt("display.refresh-seconds", 10));
+        // PERFORMANCE FIX: Erhöhe Standard-Refresh von 10 auf 20 Sekunden
+        // Reduziert Block-Operationen bei vielen Shops
+        int refresh = Math.max(1, plugin.getConfig().getInt("display.refresh-seconds", 20));
         long period = refresh * 20L;
         taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::tick, 40L, period);
     }
@@ -71,8 +73,13 @@ public class DisplayService {
                 continue;
             }
 
-            // Wenn kein Schild vorhanden → erstellen
+            // BUGFIX: Prüfe ob Block Air ist, bevor Schild erstellt wird
+            // Verhindert Überschreiben von anderen Blöcken
             if (!isShopSign(signBlock)) {
+                if (!signBlock.getType().isAir()) {
+                    // Block ist besetzt, kein Schild erstellen
+                    continue;
+                }
                 signBlock.setType(Material.OAK_WALL_SIGN, false);
                 org.bukkit.block.data.type.WallSign wallSign = (org.bukkit.block.data.type.WallSign) signBlock.getBlockData();
                 wallSign.setFacing(front);

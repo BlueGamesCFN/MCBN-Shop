@@ -147,9 +147,12 @@ public class BossBarService {
                     bar.setTitle(title);
                     bar.setProgress(progress);
 
-                    // Ensure all online players see it
+                    // PERFORMANCE FIX: Optimiere Player-Check
+                    // contains() ist teuer bei vielen Spielern
+                    // Verwende Set für schnelleren Lookup
+                    java.util.Set<Player> currentPlayers = new java.util.HashSet<>(bar.getPlayers());
                     for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (!bar.getPlayers().contains(p)) {
+                        if (!currentPlayers.contains(p)) {
                             bar.addPlayer(p);
                         }
                     }
@@ -160,6 +163,7 @@ public class BossBarService {
 
     /**
      * Broadcastet alle Auktionen temporär (PERIODIC mode).
+     * PERFORMANCE FIX: Limitiere Anzahl der temporären Tasks
      */
     private void broadcastAllLotsTemporary() {
         List<Auction> auctions = new ArrayList<>(auctionManager.allAuctions());
@@ -171,12 +175,20 @@ public class BossBarService {
         final BarColor color = parseBarColor(plugin.getConfig().getString("bossbar.color", "BLUE"));
         final BarStyle style = parseBarStyle(plugin.getConfig().getString("bossbar.style", "SEGMENTED_10"));
 
+        // PERFORMANCE FIX: Limitiere auf max 10 Lots pro Broadcast
+        // Verhindert hunderte von Tasks bei vielen Auktionen
+        final int maxLots = plugin.getConfig().getInt("bossbar.max-lots-per-broadcast", 10);
+        int lotCount = 0;
+
         long delay = 0L;
+        outer:
         for (Auction auction : auctions) {
             long remaining = auction.endMillis() - System.currentTimeMillis();
             if (remaining <= 0) continue; // Skip expired
 
             for (AuctionLot lot : auction.lots()) {
+                if (lotCount >= maxLots) break outer;
+
                 final AuctionLot lotCopy = lot;
                 final long remainingCopy = remaining;
                 final long runAt = delay;
@@ -194,6 +206,7 @@ public class BossBarService {
                 }, runAt);
 
                 delay += perItemTicks;
+                lotCount++;
             }
         }
     }

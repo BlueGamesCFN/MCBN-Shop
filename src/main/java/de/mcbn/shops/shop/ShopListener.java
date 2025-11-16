@@ -27,12 +27,13 @@ public class ShopListener implements Listener {
     private final ChatPromptService prompts;
     private final ShopBuyGUI buyGui;
 
-    public ShopListener(Main plugin, ShopManager shops, ChatPromptService prompts) {
+    public ShopListener(Main plugin, ShopManager shops, ChatPromptService prompts, ShopBuyGUI buyGui) {
         this.plugin = plugin;
         this.shops = shops;
         this.msg = plugin.messages();
         this.prompts = prompts;
-        this.buyGui = null; // wird über Main separat registriert
+        // BUGFIX: Verwende bereits registrierte ShopBuyGUI Instanz
+        this.buyGui = buyGui;
     }
 
     /** Linksklick = sofort 1 Bundle kaufen */
@@ -77,13 +78,14 @@ public class ShopListener implements Listener {
 
         // Käufer: GUI statt Inventar
         event.setCancelled(true);
-        // Zugriff auf das registrierte GUI über Plugin:
-        de.mcbn.shops.shop.gui.ShopBuyGUI gui = plugin.getServer().getServicesManager()
-                .load(de.mcbn.shops.shop.gui.ShopBuyGUI.class); // optional, falls als Service gebunden
-        if (gui != null) {
-            gui.open(p, block, s);
+        // BUGFIX: Verwende immer neue Instanz ohne Listener-Registrierung
+        // Die GUI-Klasse ist bereits als Listener in Main.java registriert
+        // Wir öffnen nur das GUI, erstellen keinen neuen Listener
+        if (buyGui != null) {
+            buyGui.open(p, block, s);
         } else {
-            // Fallback: neue Instanz (Listener muss in Main registriert sein!)
+            // Fallback falls buyGui null ist (sollte nicht passieren)
+            // Öffne GUI direkt ohne neue Listener-Registrierung
             new de.mcbn.shops.shop.gui.ShopBuyGUI(plugin, shops).open(p, block, s);
         }
     }
